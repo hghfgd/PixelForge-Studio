@@ -3,7 +3,7 @@ chcp 65001 >nul
 setlocal
 cd /d "%~dp0"
 echo ==========================================
-echo   PixelForge Studio v1.0.0 - Windows Installer Build
+echo   PixelForge Studio v1.4.0 - Windows Installer Build
 echo ==========================================
 echo.
 where node >nul 2>nul
