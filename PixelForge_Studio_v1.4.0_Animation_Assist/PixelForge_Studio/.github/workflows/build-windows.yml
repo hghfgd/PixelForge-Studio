@@ -1,0 +1,33 @@
+name: Build PixelForge Studio Windows installer
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js for build only
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm install
+      - name: Run model tests
+        run: |
+          npm run test:smoke
+          npm run test:clips
+          node --check src/app.js
+      - name: Build NSIS installer
+        run: npm run dist
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: PixelForge-Studio-Windows-Setup
+          path: release/*.exe
+          if-no-files-found: error
+          retention-days: 30

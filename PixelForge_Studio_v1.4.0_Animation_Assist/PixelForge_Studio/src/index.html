@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PixelForge Studio — v1.4 Animation Assist</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark">P</div><div><b>PixelForge</b><span>STUDIO</span></div></div>
+    <div class="menu">
+      <button id="newBtn">New</button><button id="openBtn">Open</button><button id="saveBtn" class="primary">Save project</button>
+      <button id="undoBtn" title="Undo (Ctrl+Z)" disabled>↶ Undo</button><button id="redoBtn" title="Redo (Ctrl+Y)" disabled>↷ Redo</button>
+      <i></i><button data-workspace-action="export" id="exportPngBtn">Export PNG</button><button data-workspace-action="export" id="exportSheetBtn">Sprite sheet</button><button data-workspace-action="export" id="exportGifBtn">Export GIF</button><button data-workspace-action="export" id="exportAllBtn">Export all clips</button><button data-workspace-action="export" id="exportJsonBtn">Game JSON</button>
+    </div>
+    <div class="top-right"><span class="status-dot"></span><span id="saveStatus">Ready</span><button id="helpBtn" class="icon-btn" title="Keyboard shortcuts (?)">?</button><button class="icon-btn" title="Settings">⚙</button></div>
+  </header>
+  <nav class="workspace-switcher" aria-label="Рабочее пространство">
+    <button class="workspace-tab active" data-workspace="draw">✎ <span>Рисование</span><small>Холст и слои</small></button>
+    <button class="workspace-tab" data-workspace="animation">▶ <span>Анимация</span><small>Кадры и клипы</small></button>
+    <button class="workspace-tab" data-workspace="export">⇧ <span>Экспорт</span><small>Форматы и проверка</small></button>
+    <button class="workspace-tab all-tools" data-workspace="all">▦ <span>Все инструменты</span><small>Полный интерфейс</small></button>
+  </nav>
+  <main class="workspace">
+    <aside class="toolrail">
+      <div class="rail-label">TOOLS</div>
+      <button class="tool active" data-tool="pencil" title="Pencil (B)">✎<small>Pencil</small></button>
+      <button class="tool" data-tool="eraser" title="Eraser (E)">◩<small>Eraser</small></button>
+      <button class="tool" data-tool="bucket" title="Fill (G)">▨<small>Fill</small></button>
+      <button class="tool" data-tool="eyedropper" title="Eyedropper (I)">⌖<small>Picker</small></button>
+      <button class="tool" data-tool="line" title="Line (L)">／<small>Line</small></button>
+      <button class="tool" data-tool="rect" title="Rectangle (U)">□<small>Rect</small></button>
+      <button class="tool" data-tool="ellipse" title="Ellipse (O)">◯<small>Ellipse</small></button>
+      <button class="tool" data-tool="select" title="Rectangular selection (M)">▧<small>Select</small></button>
+      <button class="tool" data-tool="move" title="Move selection (V)">✥<small>Move</small></button>
+    </aside>
+    <section class="center">
+      <div class="documentbar">
+        <div><span class="doc-icon">▦</span><b id="docName">Untitled sprite</b><span class="muted" id="docSize">64 × 64</span></div>
+        <div class="canvas-controls"><button id="zoomOut">−</button><span id="zoomLabel">800%</span><button id="zoomIn">+</button><button id="zoomFit" title="Fit canvas (F)">Fit</button><span class="muted" title="Колесо мыши — масштаб; Space + перетаскивание или средняя кнопка — перемещение">Wheel · Space+Drag</span><button id="gridBtn" class="toggle active">Grid</button><button id="onionBtn" class="toggle">Onion</button><label class="bg-choice">BG <select id="previewBackground"><option value="checker">Checker</option><option value="dark">Dark</option><option value="light">Light</option></select></label><button id="referenceBtn">Reference</button><input id="referenceFile" type="file" accept="image/*" hidden></div>
+      </div>
+      <div class="canvas-stage" id="stage">
+        <div class="canvas-wrap" id="canvasWrap">
+          <canvas id="artCanvas" width="64" height="64"></canvas>
+          <canvas id="overlayCanvas" width="64" height="64"></canvas>
+        </div>
+      </div>
+      <div class="statusbar"><span id="cursorInfo">X: —  Y: —</span><span id="toolInfo">Pencil tool</span><span>RGBA · Nearest neighbour</span></div>
+    </section>
+    <aside class="inspector">
+      <section class="panel" data-workspace-panel="draw">
+        <div class="panel-head"><b>COLOR</b><span class="muted">PRIMARY</span></div>
+        <div class="color-row"><input type="color" id="colorPicker" value="#e6a45b"><div><b id="hexValue">#E6A45B</b><small>Foreground color</small></div></div>
+        <div class="swatches" id="swatches"></div>
+        <div class="panel-actions"><button id="addSwatch">＋ Add color</button><button id="swapColor">⇄</button></div>
+      </section>
+      <section class="panel brush-panel" data-workspace-panel="draw">
+        <div class="panel-head"><b>BRUSH</b><span class="muted" id="brushSizeLabel">1 px</span></div>
+        <label class="brush-size-row">Size <input id="brushSize" type="range" min="1" max="16" value="1"><b id="brushSizeValue">1</b></label>
+        <div class="brush-shapes" role="group" aria-label="Brush shape"><button type="button" class="brush-shape active" data-brush-shape="square" title="Square brush">■ Square</button><button type="button" class="brush-shape" data-brush-shape="circle" title="Round brush">● Round</button></div>
+        <label class="brush-check"><input id="mirrorX" type="checkbox"> Mirror horizontally</label>
+        <label class="brush-check"><input id="mirrorY" type="checkbox"> Mirror vertically</label>
+        <p class="hint">Hold <kbd>Alt</kbd> temporarily to pick a color.</p>
+      </section>
+      <section class="panel layers-panel" data-workspace-panel="draw">
+        <div class="panel-head"><b>LAYERS</b><div><button id="moveLayerUp" class="mini" title="Move layer up">↑</button><button id="moveLayerDown" class="mini" title="Move layer down">↓</button><button id="addLayer" class="mini" title="Add shared layer">＋</button><button id="addPart" class="mini" title="Add character part layer">Part</button><button id="deleteLayer" class="mini" title="Delete shared layer">−</button></div></div>
+        <div id="layersList" class="layers-list"></div>
+        <div class="layer-opacity"><label for="layerOpacity">Opacity <b id="layerOpacityValue">100%</b></label><input id="layerOpacity" type="range" min="0" max="100" value="100"><small id="layerScopeHint">Shared structure · frame-specific pixels</small></div>
+      </section>
+      <section class="panel" data-workspace-panel="draw">
+        <div class="panel-head"><b>SELECTION</b><span class="muted" id="selectionInfo">No selection</span></div>
+        <div class="selection-actions"><button id="copySelection">Copy</button><button id="cutSelection">Cut</button><button id="pasteSelection">Paste</button><button id="clearSelection">Deselect</button><button id="flipH">Flip H</button><button id="flipV">Flip V</button><button id="rotateSelection">Rotate 90°</button></div>
+      </section>
+      <section class="panel" data-workspace-panel="export">
+        <div class="panel-head"><b>GIF EXPORT</b></div>
+        <div class="gif-options">
+          <label>Scale <select id="gifScale"><option value="1">1×</option><option value="2" selected>2×</option><option value="3">3×</option><option value="4">4×</option><option value="8">8×</option></select></label>
+          <label>Quality <select id="gifQuality"><option value="10">High</option><option value="20" selected>Balanced</option><option value="30">Smaller file</option></select></label>
+        </div>
+        <p class="hint">GIF uses current frame timing and visible layers.</p>
+      </section>
+      <section class="panel" data-workspace-panel="animation">
+        <div class="panel-head"><b>ANIMATION DATA</b><span class="muted">PER FRAME</span></div>
+        <div class="field-row"><label>Pivot X</label><input id="pivotX" type="number" min="0" max="512" value="32"><label>Y</label><input id="pivotY" type="number" min="0" max="512" value="56"></div>
+        <div class="field-row"><label>Event</label><input id="frameEvent" type="text" placeholder="footstep / hit" style="flex:1;min-width:0"></div>
+        <button id="applyPivotAll" class="wide">Apply pivot to whole clip</button>
+      </section>
+      <section class="panel" data-workspace-panel="export">
+        <div class="panel-head"><b>PALETTE TOOLS</b></div>
+        <div class="field-row"><label>Replace</label><input id="replaceFrom" type="color" value="#e6a45b"><label>With</label><input id="replaceTo" type="color" value="#ffffff"></div>
+        <button id="replaceColorBtn" class="wide">Replace color in whole project</button>
+      </section>
+      <section class="panel" data-workspace-panel="draw">
+        <div class="panel-head"><b>REFERENCE</b></div>
+        <img id="referencePreview" alt="Motion reference" hidden style="width:100%;max-height:130px;object-fit:contain;background:#0c1016;border-radius:5px">
+        <p class="hint">Load a pose or movement reference. It stays outside exported sprite pixels.</p>
+      </section>
+      <section class="panel" data-workspace-panel="animation">
+        <div class="panel-head"><b>ANIMATION CHECK</b></div>
+        <button id="analyzeBtn" class="wide">Check current clip</button><div id="analysisResults" class="analysis-results">No analysis yet</div>
+      </section>
+      <section class="panel" data-workspace-panel="draw">
+        <div class="panel-head"><b>DOCUMENT</b></div>
+        <div class="field-row"><label>Width</label><input id="docWidth" type="number" min="1" max="512" value="64"><label>Height</label><input id="docHeight" type="number" min="1" max="512" value="64"></div>
+        <button id="resizeBtn" class="wide">Resize canvas</button>
+      </section>
+    </aside>
+  </main>
+  <section class="timeline" data-workspace-panel="animation">
+    <div class="timeline-head"><div><b>ЛЕНТА АНИМАЦИИ</b><span class="muted" id="frameCount">Покой · 1 кадр</span></div>
+      <div class="timeline-actions timeline-primary">
+        <label>КЛИП <select id="clipSelect" aria-label="Клип анимации"></select></label>
+        <select id="clipTemplate" title="Быстрый шаблон клипа"><option value="Idle">Покой · 8 FPS</option><option value="Walk" selected>Шаг · 10 FPS</option><option value="Run">Бег · 12 FPS</option><option value="Jump">Прыжок · 10 FPS</option><option value="Attack">Атака · 12 FPS</option><option value="Death">Смерть · 8 FPS</option></select>
+        <button id="clipAdd" title="Создать клип по шаблону">＋ Клип</button><button id="clipDelete" title="Удалить текущий клип">−</button>
+        <label>FPS <input id="fpsInput" type="number" min="1" max="60" value="8"></label>
+        <button id="playBtn" class="primary">▶ Воспроизвести</button>
+        <button id="addFrame">＋ Пустой кадр</button><button id="duplicateFrame">▣ Копировать кадр</button><button id="deleteFrame">− Удалить</button>
+      </div>
+      <details class="timeline-advanced"><summary>Дополнительные настройки и операции с кадрами</summary>
+        <div class="timeline-actions timeline-secondary">
+          <label>ДВИЖОК <select id="enginePreset"><option value="generic">Generic JSON</option><option value="godot">Godot</option><option value="unity">Unity</option><option value="gamemaker">GameMaker</option></select></label>
+          <label class="loop-control"><input id="clipLoop" type="checkbox" checked> Зациклить</label>
+          <label>Длительность, мс <input id="frameDuration" type="number" min="20" max="10000" step="10" value="125"></label>
+          <button id="applyFpsBtn" title="Применить FPS ко всем кадрам">Применить FPS</button>
+          <button id="copyLayerPrev" title="Заменить активный слой содержимым того же слоя из предыдущего кадра">← Взять слой из предыдущего</button>
+          <button id="copyLayerNext" title="Заменить активный слой содержимым того же слоя из следующего кадра">Взять слой из следующего →</button>
+          <button id="inbetweenBtn" title="Создать полупрозрачные промежуточные кадры между текущим и следующим">Промежуточные кадры…</button>
+          <label>Луковая кожа <input id="onionRange" type="range" min="1" max="4" value="1"><b id="onionRangeValue">1 кадр.</b></label>
+          <label>Прозрачность <input id="onionOpacity" type="range" min="5" max="60" value="24"><b id="onionOpacityValue">24%</b></label>
+          <button id="duplicateSelected">Дублировать выбранные</button><button id="deleteSelected">Удалить выбранные</button><button id="setSelectedDuration">Задать длительность</button>
+        </div>
+      </details>
+    </div>
+    <div class="timeline-body"><div class="track-labels" id="trackLabels"></div><div class="frames" id="frames"></div></div><div class="timeline-foot"><span id="selectionCount">Выбран 1 кадр</span><span>Ctrl/Shift + клик — выбрать несколько · Перетаскивание — изменить порядок · Пробел — воспроизведение</span></div>
+  </section>
+
+  <div id="shortcutDialog" class="modal-backdrop" hidden><section class="shortcut-dialog"><div class="dialog-head"><b>БЫСТРЫЕ КОМАНДЫ</b><button id="closeHelp" aria-label="Close">✕</button></div><div class="shortcut-grid"><span>Рисование</span><kbd>B</kbd><span>Ластик</span><kbd>E</kbd><span>Заливка</span><kbd>G</kbd><span>Пипетка</span><kbd>I</kbd><span>Линия</span><kbd>L</kbd><span>Прямоугольник</span><kbd>U</kbd><span>Эллипс</span><kbd>O</kbd><span>Выделение</span><kbd>M</kbd><span>Перемещение</span><kbd>V</kbd><span>Предыдущий / следующий кадр</span><kbd>← / →</kbd><span>Воспроизведение</span><kbd>Space</kbd><span>Отменить / повторить</span><kbd>Ctrl+Z / Ctrl+Y</kbd><span>Сохранить проект</span><kbd>Ctrl+S</kbd><span>Подогнать холст</span><kbd>F</kbd><span>Масштаб</span><kbd>Wheel / + / −</kbd><span>Переместить холст</span><kbd>Space+Drag / MMB</kbd><span>Эта памятка</span><kbd>?</kbd></div><p>Подсказка: Ctrl/Shift + клик по кадрам — множественный выбор; перетаскивание — изменение порядка.</p></section></div>
+  <script src="../node_modules/gif.js/dist/gif.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
