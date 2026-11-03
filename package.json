@@ -1,0 +1,47 @@
+{
+  "name": "pixelforge-studio",
+  "version": "1.4.0",
+  "description": "Pixel-art editor with assisted sprite animation workflow",
+  "main": "src/main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis",
+    "pack": "electron-builder --dir",
+    "test:smoke": "node tests/layer-model-smoke.cjs",
+    "test:clips": "node tests/clip-model-smoke.cjs",
+    "test:all": "npm run test:smoke && npm run test:clips && node --check src/app.js"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "studio.pixelforge.desktop",
+    "productName": "PixelForge Studio",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "asarUnpack": [
+      "node_modules/gif.js/dist/gif.worker.js"
+    ]
+  },
+  "dependencies": {
+    "gif.js": "^0.2.0"
+  }
+}
