@@ -63,3 +63,7 @@ body[data-workspace="export"] .workspace{height:calc(100vh - 120px)}
 /* v1.4 animation assistance controls */
 .timeline-secondary #onionRange,.timeline-secondary #onionOpacity{width:78px;padding:0;accent-color:var(--accent)}
 .timeline-secondary #onionRangeValue,.timeline-secondary #onionOpacityValue{min-width:34px;color:#c4ccda;font-size:10px}
+
+
+/* Keep the visual overlay from intercepting drawing input. */
+.canvas-wrap #overlayCanvas{pointer-events:none}
