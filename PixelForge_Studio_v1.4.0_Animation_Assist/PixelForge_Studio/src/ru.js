@@ -22,6 +22,15 @@
     "Rendering…":"Обработка…","No selection":"Нет выделения","All":"Все инструменты","Untitled sprite":"Новый спрайт","Untitled":"Без названия",
     "LAYERS":"СЛОИ","TOOLS":"ИНСТРУМЕНТЫ","Wheel · Space+Drag":"Колесо мыши · Пробел + перетаскивание","RGBA · Nearest neighbour":"RGBA · Интерполяция по ближайшему соседу"
   }));
+  [
+    ["↶ Undo","↶ Отменить"],["↷ Redo","↷ Повторить"],
+    ["Fit canvas (F)","Подогнать холст (F)"],["Pencil (B)","Карандаш (B)"],["Eraser (E)","Ластик (E)"],["Fill (G)","Заливка (G)"],["Eyedropper (I)","Пипетка (I)"],["Line (L)","Линия (L)"],["Rectangle (U)","Прямоугольник (U)"],["Ellipse (O)","Эллипс (O)"],["Rectangular selection (M)","Прямоугольное выделение (M)"],["Move selection (V)","Перемещение выделения (V)"],
+    ["Toggle visibility","Переключить видимость"],["Unlock layer","Разблокировать слой"],["Lock layer","Заблокировать слой"],["Shared layer name","Название слоя"],
+    ["Square brush","Квадратная кисть"],["Round brush","Круглая кисть"],["Apply FPS to all frames","Применить частоту кадров ко всем кадрам"],
+    ["Pivot X","Опорная точка X"],["Pivot Y","Опорная точка Y"],["Generic JSON","Универсальный JSON"],
+    ["Save PixelForge project","Сохранить проект PixelForge"],["PixelForge Project","Проект PixelForge"],["PNG Image","Изображение PNG"],
+    ["No analysis yet","Проверка ещё не запускалась"],["Selected 1 frame","Выбран 1 кадр"],["Untitled sprite","Новый спрайт"]
+  ].forEach(([from,to]) => exact.set(from,to));
   const patterns = [
     [/^Frame (\d+) · (\d+)ms$/, "Кадр $1 · $2 мс"],
     [/^Created (.+) clip$/, "Создан клип «$1»"],
