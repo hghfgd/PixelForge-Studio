@@ -280,7 +280,7 @@ if(document.body && document.querySelectorAll){
 
 // v0.9: quick clip presets, fit-to-window, collapsible panels and shortcut guide.
 function createPresetClip(name){
-  const defaults={Idle:8,Walk:10,Run:12,Jump:10,Attack:12,Death:8};
+  const defaults={'Покой':8,'Шаг':10,'Бег':12,'Прыжок':10,'Атака':12,'Смерть':8};
   let finalName=name||'Шаг';
   if(clips.some(c=>c.name.toLowerCase()===finalName.toLowerCase())){
     let n=2;while(clips.some(c=>c.name.toLowerCase()===(finalName+' '+n).toLowerCase()))n++;
