@@ -4,7 +4,7 @@ const art = $('artCanvas'), overlay = $('overlayCanvas'), ctx = art.getContext('
 let W=64,H=64,zoom=8,grid=true,onion=false,onionRange=1,onionOpacity=.24,tool='pencil',color='#e6a45b',playing=false,playTimer=null;
 let brushSize=1,brushShape='square',mirrorX=false,mirrorY=false;
 let layerDefs=[{id:'layer-1',name:'Layer 1',visible:true,opacity:1,locked:false}], nextLayerId=2;
-let clips=[{id:'clip-1',name:'Idle',fps:8,loop:true,frames:[makeFrame()]}],activeClipId='clip-1',frames=clips[0].frames,frameIndex=0, layerIndex=0, swatches=['#101319','#252b38','#4c5366','#9b83ff','#e6a45b','#e9d8bd','#f3f0e8','#a94f56','#547c68','#ffffff'];
+let clips=[{id:'clip-1',name:'Покой',fps:8,loop:true,frames:[makeFrame()]}],activeClipId='clip-1',frames=clips[0].frames,frameIndex=0, layerIndex=0, swatches=['#101319','#252b38','#4c5366','#9b83ff','#e6a45b','#e9d8bd','#f3f0e8','#a94f56','#547c68','#ffffff'];
 let undoStack=[], redoStack=[];
 let selection=null, selectionStart=null, clipboard=null;
 let selectedFrames=new Set([0]), referenceDataUrl=null, autoSaveTimer=null, thumbCache=new WeakMap();
@@ -33,14 +33,14 @@ function undo(){
   redoStack.push(JSON.stringify(serialize()));
   const previous=undoStack.pop();
   restoreSnapshot(previous);
-  $('saveStatus').textContent='Undo';
+  $('saveStatus').textContent='Отменить';
 }
 function redo(){
   if(!redoStack.length)return;
   undoStack.push(JSON.stringify(serialize()));
   const next=redoStack.pop();
   restoreSnapshot(next);
-  $('saveStatus').textContent='Redo';
+  $('saveStatus').textContent='Повторить';
 }
 function updateHistoryButtons(){
   const u=$('undoBtn'),r=$('redoBtn');
@@ -55,7 +55,7 @@ function loadProject(d){
   else {const first=oldFrames[0]?.layers||[];layerDefs=first.length?first.map((l,i)=>({id:`layer-${i+1}`,name:l.name||`Layer ${i+1}`,visible:l.visible!==false,opacity:Number.isFinite(+l.opacity)?Math.max(0,Math.min(1,+l.opacity)):1,locked:!!l.locked})): [{id:'layer-1',name:'Layer 1',visible:true,opacity:1,locked:false}];}
   nextLayerId=Math.max(1,...layerDefs.map(l=>Number(String(l.id).replace(/\D/g,''))||0))+1;
   const decode=srcFrames=>srcFrames.map(f=>({duration:Number(f.duration)||125,pivot:f.pivot||{x:Math.floor(W/2),y:Math.floor(H*.875)},event:f.event||'',layers:layerDefs.map((def,i)=>{const src=f.layers?.[i];const raw=src?.pixels||[];const pixels=new Uint8ClampedArray(W*H*4);pixels.set(raw.slice(0,pixels.length));return {pixels}})}));
-  clips=Array.isArray(d.clips)&&d.clips.length?d.clips.map((c,i)=>({id:c.id||`clip-${i+1}`,name:c.name||`Clip ${i+1}`,fps:Math.max(1,Math.min(60,Number(c.fps)||8)),loop:c.loop!==false,frames:decode(c.frames?.length?c.frames:oldFrames)})):[{id:'clip-1',name:'Idle',fps:Math.max(1,Math.min(60,Number(d.fps)||8)),loop:true,frames:decode(oldFrames)}];
+  clips=Array.isArray(d.clips)&&d.clips.length?d.clips.map((c,i)=>({id:c.id||`clip-${i+1}`,name:c.name||`Clip ${i+1}`,fps:Math.max(1,Math.min(60,Number(c.fps)||8)),loop:c.loop!==false,frames:decode(c.frames?.length?c.frames:oldFrames)})):[{id:'clip-1',name:'Покой',fps:Math.max(1,Math.min(60,Number(d.fps)||8)),loop:true,frames:decode(oldFrames)}];
   activeClipId=clips.some(c=>c.id===d.activeClipId)?d.activeClipId:clips[0].id;frames=activeClip().frames;
   frameIndex=Math.min(Math.max(0,Number(d.frameIndex)||0),frames.length-1);layerIndex=Math.min(Math.max(0,Number(d.layerIndex)||0),Math.max(0,layerDefs.length-1));
   $('fpsInput').value=activeClip().fps;$('clipLoop').checked=activeClip().loop;$('frameDuration').value=Math.round(current().duration);$('docWidth').value=W;$('docHeight').value=H;$('docSize').textContent=`${W} × ${H}`;resizeCanvases();renderAll();
@@ -88,7 +88,7 @@ function syncFrameMetadata(){if(!$('pivotX'))return;const p=current().pivot||{x:
 function scheduleAutoSave(){try{if(autoSaveTimer)clearTimeout(autoSaveTimer);autoSaveTimer=setTimeout(()=>{try{localStorage.setItem('pixelforge-autosave',JSON.stringify(serialize()));$('saveStatus').textContent='Auto-saved'}catch(e){$('saveStatus').textContent='Auto-save unavailable'}} ,900)}catch(e){}}
 function downloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000)}
 function downloadJson(data,name){downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),name)}
-function addCharacterPart(){const part=prompt('Название части персонажа (например Head, Body, Left Arm, Weapon):','Head');if(!part||!part.trim())return;snapshot();const def={id:`layer-${nextLayerId++}`,name:'Part: '+part.trim(),visible:true,opacity:1,locked:false};layerDefs.push(def);thumbCache=new WeakMap();clips.forEach(c=>c.frames.forEach(f=>f.layers.push(makeCel())));syncClip();layerIndex=layerDefs.length-1;renderAll()}
+function addCharacterPart(){const part=prompt('Название части персонажа (например, Голова, Тело, Левая рука, Оружие):','Голова');if(!part||!part.trim())return;snapshot();const def={id:`layer-${nextLayerId++}`,name:'Часть: '+part.trim(),visible:true,opacity:1,locked:false};layerDefs.push(def);thumbCache=new WeakMap();clips.forEach(c=>c.frames.forEach(f=>f.layers.push(makeCel())));syncClip();layerIndex=layerDefs.length-1;renderAll()}
 function replaceColorEverywhere(from,to){const a=hexRgb(from),b=hexRgb(to);let changed=0;snapshot();clips.forEach(c=>c.frames.forEach(f=>f.layers.forEach(l=>{const p=l.pixels;for(let i=0;i<p.length;i+=4)if(p[i+3]&&p[i]===a[0]&&p[i+1]===a[1]&&p[i+2]===a[2]){p[i]=b[0];p[i+1]=b[1];p[i+2]=b[2];changed++}})));thumbCache=new WeakMap();renderAll();$('saveStatus').textContent=`Replaced ${changed} pixels`}
 function analyzeClip(){const issues=[],opaque=[];frames.forEach((f,i)=>{let minX=W,minY=H,maxX=-1,maxY=-1;f.layers.forEach(l=>{for(let p=3;p<l.pixels.length;p+=4)if(l.pixels[p]){const n=(p-3)/4,x=n%W,y=Math.floor(n/W);minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y)}});if(maxX<0){issues.push(`Кадр ${i+1}: полностью пустой`);return}if(minX===0||minY===0||maxX===W-1||maxY===H-1)issues.push(`Кадр ${i+1}: спрайт касается края холста`);const p=f.pivot||{};if(p.x<0||p.y<0||p.x>=W||p.y>=H)issues.push(`Кадр ${i+1}: pivot за пределами холста`);opaque.push({x:(minX+maxX)/2,y:(minY+maxY)/2})});for(let i=1;i<opaque.length;i++){const d=Math.hypot(opaque[i].x-opaque[i-1].x,opaque[i].y-opaque[i-1].y);if(d>Math.max(W,H)*.22)issues.push(`Кадр ${i+1}: резкий скачок центра спрайта (${d.toFixed(1)} px)`)}if(activeClip().loop&&opaque.length>1){const d=Math.hypot(opaque[0].x-opaque.at(-1).x,opaque[0].y-opaque.at(-1).y);if(d>Math.max(W,H)*.22)issues.push('Возможен рывок на стыке зацикливания')}const box=$('analysisResults');box.innerHTML=issues.length?issues.map(x=>`<div class="analysis-warning">⚠ ${escapeHtml(x)}</div>`).join(''):'<div class="analysis-ok">✓ Очевидных проблем не найдено</div>';box.innerHTML+='<small>Эвристическая проверка геометрии; не заменяет визуальную оценку.</small>'}
 function exportGameData(){const preset=$('enginePreset')?.value||'generic';downloadJson({format:'PixelForgeGameAnimation',version:1,engine:preset,width:W,height:H,layers:layerDefs.map((l,i)=>({index:i,name:l.name,visible:l.visible,opacity:l.opacity})),clips:clips.map(c=>({name:c.name,fps:c.fps,loop:c.loop,frames:c.frames.map((f,i)=>({index:i,duration:f.duration,pivot:f.pivot,event:f.event,layers:f.layers.map((cel,li)=>({layer:layerDefs[li].name,pixels:Array.from(cel.pixels)}))}))}))},'pixelforge-animation-data.json')}
@@ -156,10 +156,10 @@ $('inbetweenBtn').onclick=()=>{const n=prompt('Сколько промежуто
 $('deleteFrame').onclick=()=>{if(frames.length>1){snapshot();frames.splice(frameIndex,1);frameIndex=Math.max(0,frameIndex-1);selectedFrames=new Set([frameIndex]);layerIndex=0;syncClip();renderAll()}};
 $('fpsInput').onchange=()=>{snapshot();activeClip().fps=Math.max(1,Math.min(60,+$('fpsInput').value||8));$('fpsInput').value=activeClip().fps;scheduleAutoSave()};
 $('clipSelect').onchange=e=>switchClip(e.target.value);
-$('clipAdd').onclick=()=>{const name=prompt('Название нового клипа (например, Walk, Run, Jump):','Walk');if(!name||!name.trim())return;if(clips.some(c=>c.name.toLowerCase()===name.trim().toLowerCase()))return alert('Клип с таким названием уже существует.');snapshot();const id='clip-'+Date.now();clips.push({id,name:name.trim(),fps:8,loop:true,frames:[makeFrame()]});switchClip(id)};
+$('clipAdd').onclick=()=>{const name=prompt('Название нового клипа (например, Шаг, Бег, Прыжок):','Шаг');if(!name||!name.trim())return;if(clips.some(c=>c.name.toLowerCase()===name.trim().toLowerCase()))return alert('Клип с таким названием уже существует.');snapshot();const id='clip-'+Date.now();clips.push({id,name:name.trim(),fps:8,loop:true,frames:[makeFrame()]});switchClip(id)};
 $('clipDelete').onclick=()=>{if(clips.length<=1)return;if(!confirm('Удалить клип «'+activeClip().name+'» и все его кадры?'))return;snapshot();clips=clips.filter(c=>c.id!==activeClipId);activeClipId=clips[0].id;frames=activeClip().frames;frameIndex=0;renderAll()};
 $('clipLoop').onchange=()=>{snapshot();activeClip().loop=$('clipLoop').checked;scheduleAutoSave()};
-$('applyFpsBtn').onclick=()=>{const ms=1000/Math.max(1,Math.min(60,+$('fpsInput').value||8));snapshot();frames.forEach(f=>f.duration=ms);activeClip().fps=+$('fpsInput').value;syncClip();renderAll();$('saveStatus').textContent='FPS applied to current clip'};
+$('applyFpsBtn').onclick=()=>{const ms=1000/Math.max(1,Math.min(60,+$('fpsInput').value||8));snapshot();frames.forEach(f=>f.duration=ms);activeClip().fps=+$('fpsInput').value;syncClip();renderAll();$('saveStatus').textContent='Частота кадров применена к текущему клипу'};
 $('frameDuration').onchange=()=>{const ms=Math.max(20,Math.min(10000,+$('frameDuration').value||125));snapshot();current().duration=ms;$('frameDuration').value=ms;render();};
 $('playBtn').onclick=()=>{playing=!playing;$('playBtn').textContent=playing?'■ Stop':'▶ Play';if(playing){let tick=()=>{if(!playing)return;if(frameIndex>=frames.length-1){if(activeClip().loop)frameIndex=0;else{playing=false;$('playBtn').textContent='▶ Play';return}}else frameIndex++;render();playTimer=setTimeout(tick,current().duration)};tick()}else clearTimeout(playTimer)};
 $('gridBtn').onclick=()=>{grid=!grid;$('gridBtn').classList.toggle('active',grid);render()};
@@ -175,9 +175,9 @@ function setZoom(z,anchor=null){
 $('stage').addEventListener('wheel',e=>{e.preventDefault();setZoom(zoom*(e.deltaY<0?1.2:1/1.2),{x:e.clientX,y:e.clientY})},{passive:false});
 $('zoomIn').onclick=()=>setZoom(zoom+2);$('zoomOut').onclick=()=>setZoom(zoom-2);
 $('resizeBtn').onclick=()=>{let nw=Math.max(1,Math.min(512,+$('docWidth').value)),nh=Math.max(1,Math.min(512,+$('docHeight').value));snapshot();clips.forEach(c=>c.frames.forEach(f=>f.layers.forEach(l=>{let np=new Uint8ClampedArray(nw*nh*4);for(let y=0;y<Math.min(H,nh);y++)for(let x=0;x<Math.min(W,nw);x++)np.set(l.pixels.slice(idx(x,y),idx(x,y)+4),(y*nw+x)*4);l.pixels=np})));syncClip();W=nw;H=nh;$('docSize').textContent=`${W} × ${H}`;renderAll()};
-$('newBtn').onclick=()=>{if(!confirm('Create a new 64 × 64 document? Unsaved changes will be lost.'))return;undoStack=[];redoStack=[];updateHistoryButtons();W=H=64;layerDefs=[{id:'layer-1',name:'Layer 1',visible:true,opacity:1,locked:false}];nextLayerId=2;clips=[{id:'clip-1',name:'Idle',fps:8,loop:true,frames:[makeFrame()]}];activeClipId='clip-1';frames=clips[0].frames;frameIndex=layerIndex=0;selectedFrames=new Set([0]);$('docWidth').value=$('docHeight').value=64;$('docName').textContent='Untitled sprite';$('docSize').textContent='64 × 64';renderAll()};
-$('saveBtn').onclick=async()=>{if(!window.pf)return alert('Run this app with npm start to enable project dialogs.');let r=await window.pf.saveProject(serialize());if(!r.canceled){$('saveStatus').textContent='Saved';$('docName').textContent=r.filePath.split(/[\\/]/).pop()}};
-$('openBtn').onclick=async()=>{if(!window.pf)return alert('Run this app with npm start to enable project dialogs.');let r=await window.pf.openProject();if(!r.canceled){loadProject(r.data);undoStack=[];redoStack=[];updateHistoryButtons();$('docName').textContent=r.filePath.split(/[\\/]/).pop();$('saveStatus').textContent='Opened'}};
+$('newBtn').onclick=()=>{if(!confirm('Создать новый документ 64 × 64? Несохранённые изменения будут потеряны.'))return;undoStack=[];redoStack=[];updateHistoryButtons();W=H=64;layerDefs=[{id:'layer-1',name:'Layer 1',visible:true,opacity:1,locked:false}];nextLayerId=2;clips=[{id:'clip-1',name:'Покой',fps:8,loop:true,frames:[makeFrame()]}];activeClipId='clip-1';frames=clips[0].frames;frameIndex=layerIndex=0;selectedFrames=new Set([0]);$('docWidth').value=$('docHeight').value=64;$('docName').textContent='Untitled sprite';$('docSize').textContent='64 × 64';renderAll()};
+$('saveBtn').onclick=async()=>{if(!window.pf)return alert('Запустите программу командой npm start, чтобы включить окна открытия и сохранения проектов.');let r=await window.pf.saveProject(serialize());if(!r.canceled){$('saveStatus').textContent='Saved';$('docName').textContent=r.filePath.split(/[\\/]/).pop()}};
+$('openBtn').onclick=async()=>{if(!window.pf)return alert('Запустите программу командой npm start, чтобы включить окна открытия и сохранения проектов.');let r=await window.pf.openProject();if(!r.canceled){loadProject(r.data);undoStack=[];redoStack=[];updateHistoryButtons();$('docName').textContent=r.filePath.split(/[\\/]/).pop();$('saveStatus').textContent='Opened'}};
 function dataUrlBytes(url){return Uint8Array.from(atob(url.split(',')[1]),c=>c.charCodeAt(0))}
 async function exportCanvas(canvas,name){let url=canvas.toDataURL('image/png');if(window.pf)await window.pf.exportFile({name,data:dataUrlBytes(url),filters:[{name:'PNG Image',extensions:['png']}]});else{let a=document.createElement('a');a.href=url;a.download=name;a.click()}}
 $('exportPngBtn').onclick=()=>{let c=document.createElement('canvas');c.width=W;c.height=H;drawPixels(c.getContext('2d'),composite());exportCanvas(c,'sprite.png')};
@@ -194,7 +194,7 @@ $('flipH').onclick=()=>transformSelection('h');$('flipV').onclick=()=>transformS
 
 
 async function exportGif(){
-  if(typeof GIF==='undefined'){alert('GIF encoder is missing. Run npm install and restart the app.');return;}
+  if(typeof GIF==='undefined'){alert('Не найден кодировщик GIF. Выполните npm install и перезапустите программу.');return;}
   if(playing){playing=false;clearTimeout(playTimer);$('playBtn').textContent='▶ Play';}
   const scale=Math.max(1,Math.min(8,+$('gifScale').value||2));
   const quality=Math.max(1,+$('gifQuality').value||20);
@@ -281,15 +281,15 @@ if(document.body && document.querySelectorAll){
 // v0.9: quick clip presets, fit-to-window, collapsible panels and shortcut guide.
 function createPresetClip(name){
   const defaults={Idle:8,Walk:10,Run:12,Jump:10,Attack:12,Death:8};
-  let finalName=name||'Walk';
+  let finalName=name||'Шаг';
   if(clips.some(c=>c.name.toLowerCase()===finalName.toLowerCase())){
     let n=2;while(clips.some(c=>c.name.toLowerCase()===(finalName+' '+n).toLowerCase()))n++;
     finalName+=' '+n;
   }
   snapshot();const fps=defaults[name]||8;const id='clip-'+Date.now()+'-'+Math.floor(Math.random()*10000);
-  clips.push({id,name:finalName,fps,loop:name!=='Death',frames:[makeFrame()]});
+  clips.push({id,name:finalName,fps,loop:name!=='Смерть',frames:[makeFrame()]});
   activeClipId=id;frames=activeClip().frames;frameIndex=0;layerIndex=0;selectedFrames=new Set([0]);
-  renderAll();$('saveStatus').textContent='Created '+finalName+' clip';
+  renderAll();$('saveStatus').textContent='Создан клип «'+finalName+'»';
 }
 $('clipTemplate').onchange=()=>{};
 $('clipAdd').onclick=()=>createPresetClip($('clipTemplate').value);
