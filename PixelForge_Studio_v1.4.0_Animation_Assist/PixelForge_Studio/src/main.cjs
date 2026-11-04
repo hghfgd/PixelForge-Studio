@@ -23,9 +23,9 @@ app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(
 
 ipcMain.handle('save-project', async (_event, payload) => {
   const { canceled, filePath } = await dialog.showSaveDialog({
-    title: 'Save PixelForge project',
+    title: 'Сохранить проект PixelForge',
     defaultPath: 'untitled.pfs',
-    filters: [{ name: 'PixelForge Project', extensions: ['pfs', 'json'] }]
+    filters: [{ name: 'Проект PixelForge', extensions: ['pfs', 'json'] }]
   });
   if (canceled || !filePath) return { canceled: true };
   fs.writeFileSync(filePath, JSON.stringify(payload));
@@ -42,7 +42,7 @@ ipcMain.handle('open-project', async () => {
 ipcMain.handle('export-file', async (_event, { name, data, filters }) => {
   const { canceled, filePath } = await dialog.showSaveDialog({
     defaultPath: name,
-    filters: filters || [{ name: 'PNG Image', extensions: ['png'] }]
+    filters: filters || [{ name: 'Изображение PNG', extensions: ['png'] }]
   });
   if (canceled || !filePath) return { canceled: true };
   fs.writeFileSync(filePath, Buffer.from(data));
