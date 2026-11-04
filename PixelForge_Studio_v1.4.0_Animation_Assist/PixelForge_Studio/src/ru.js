@@ -2,7 +2,7 @@
   const exact = new Map(Object.entries({
     "New":"Создать","Open":"Открыть","Save project":"Сохранить проект","Undo":"Отменить","Redo":"Повторить",
     "Export PNG":"Экспорт PNG","Sprite sheet":"Лист спрайтов","Export GIF":"Экспорт GIF","Export all clips":"Экспорт всех клипов","Game JSON":"Данные для игры (JSON)",
-    "Ready":"Готово","Idle":"Покой","Walk":"Шаг","Run":"Бег","Jump":"Прыжок","Attack":"Атака","Death":"Смерть","Pencil":"Карандаш","Eraser":"Ластик","Fill":"Заливка","Picker":"Пипетка","Line":"Линия","Rect":"Прямоугольник","Ellipse":"Эллипс","Select":"Выделение","Move":"Перемещение",
+    "Ready":"Готово","Pencil":"Карандаш","Eraser":"Ластик","Fill":"Заливка","Picker":"Пипетка","Line":"Линия","Rect":"Прямоугольник","Ellipse":"Эллипс","Select":"Выделение","Move":"Перемещение",
     "Pencil tool":"Инструмент «Карандаш»","Eraser tool":"Инструмент «Ластик»","Bucket tool":"Инструмент «Заливка»","Eyedropper tool":"Инструмент «Пипетка»","Line tool":"Инструмент «Линия»","Rect tool":"Инструмент «Прямоугольник»","Ellipse tool":"Инструмент «Эллипс»","Select tool":"Инструмент «Выделение»","Move tool":"Инструмент «Перемещение»",
     "Fit":"По размеру","Grid":"Сетка","Onion":"Просветка","Reference":"Референс","Checker":"Шахматный фон","Dark":"Тёмный","Light":"Светлый","BG":"Фон",
     "COLOR":"ЦВЕТ","PRIMARY":"ОСНОВНОЙ","Foreground color":"Основной цвет","Add color":"Добавить цвет","BRUSH":"КИСТЬ","Size":"Размер","Square":"Квадратная","Round":"Круглая","Mirror horizontally":"Отразить по горизонтали","Mirror vertically":"Отразить по вертикали",
