@@ -4,7 +4,7 @@ const art = $('artCanvas'), overlay = $('overlayCanvas'), ctx = art.getContext('
 let W=64,H=64,zoom=8,grid=true,onion=false,onionRange=1,onionOpacity=.24,tool='pencil',color='#e6a45b',playing=false,playTimer=null;
 let brushSize=1,brushShape='square',mirrorX=false,mirrorY=false;
 let layerDefs=[{id:'layer-1',name:'Layer 1',visible:true,opacity:1,locked:false}], nextLayerId=2;
-let clips=[{id:'clip-1',name:'Покой',fps:8,loop:true,frames:[makeFrame()]}],activeClipId='clip-1',frames=clips[0].frames,frameIndex=0, layerIndex=0, swatches=['#101319','#252b38','#4c5366','#9b83ff','#e6a45b','#e9d8bd','#f3f0e8','#a94f56','#547c68','#ffffff'];
+let clips=[{id:'clip-1',name:'Idle',fps:8,loop:true,frames:[makeFrame()]}],activeClipId='clip-1',frames=clips[0].frames,frameIndex=0, layerIndex=0, swatches=['#101319','#252b38','#4c5366','#9b83ff','#e6a45b','#e9d8bd','#f3f0e8','#a94f56','#547c68','#ffffff'];
 let undoStack=[], redoStack=[];
 let selection=null, selectionStart=null, clipboard=null;
 let selectedFrames=new Set([0]), referenceDataUrl=null, autoSaveTimer=null, thumbCache=new WeakMap();
@@ -55,7 +55,7 @@ function loadProject(d){
   else {const first=oldFrames[0]?.layers||[];layerDefs=first.length?first.map((l,i)=>({id:`layer-${i+1}`,name:l.name||`Layer ${i+1}`,visible:l.visible!==false,opacity:Number.isFinite(+l.opacity)?Math.max(0,Math.min(1,+l.opacity)):1,locked:!!l.locked})): [{id:'layer-1',name:'Layer 1',visible:true,opacity:1,locked:false}];}
   nextLayerId=Math.max(1,...layerDefs.map(l=>Number(String(l.id).replace(/\D/g,''))||0))+1;
   const decode=srcFrames=>srcFrames.map(f=>({duration:Number(f.duration)||125,pivot:f.pivot||{x:Math.floor(W/2),y:Math.floor(H*.875)},event:f.event||'',layers:layerDefs.map((def,i)=>{const src=f.layers?.[i];const raw=src?.pixels||[];const pixels=new Uint8ClampedArray(W*H*4);pixels.set(raw.slice(0,pixels.length));return {pixels}})}));
-  clips=Array.isArray(d.clips)&&d.clips.length?d.clips.map((c,i)=>({id:c.id||`clip-${i+1}`,name:c.name||`Clip ${i+1}`,fps:Math.max(1,Math.min(60,Number(c.fps)||8)),loop:c.loop!==false,frames:decode(c.frames?.length?c.frames:oldFrames)})):[{id:'clip-1',name:'Покой',fps:Math.max(1,Math.min(60,Number(d.fps)||8)),loop:true,frames:decode(oldFrames)}];
+  clips=Array.isArray(d.clips)&&d.clips.length?d.clips.map((c,i)=>({id:c.id||`clip-${i+1}`,name:c.name||`Clip ${i+1}`,fps:Math.max(1,Math.min(60,Number(c.fps)||8)),loop:c.loop!==false,frames:decode(c.frames?.length?c.frames:oldFrames)})):[{id:'clip-1',name:'Idle',fps:Math.max(1,Math.min(60,Number(d.fps)||8)),loop:true,frames:decode(oldFrames)}];
   activeClipId=clips.some(c=>c.id===d.activeClipId)?d.activeClipId:clips[0].id;frames=activeClip().frames;
   frameIndex=Math.min(Math.max(0,Number(d.frameIndex)||0),frames.length-1);layerIndex=Math.min(Math.max(0,Number(d.layerIndex)||0),Math.max(0,layerDefs.length-1));
   $('fpsInput').value=activeClip().fps;$('clipLoop').checked=activeClip().loop;$('frameDuration').value=Math.round(current().duration);$('docWidth').value=W;$('docHeight').value=H;$('docSize').textContent=`${W} × ${H}`;resizeCanvases();renderAll();
@@ -280,14 +280,14 @@ if(document.body && document.querySelectorAll){
 
 // v0.9: quick clip presets, fit-to-window, collapsible panels and shortcut guide.
 function createPresetClip(name){
-  const defaults={'Покой':8,'Шаг':10,'Бег':12,'Прыжок':10,'Атака':12,'Смерть':8};
-  let finalName=name||'Шаг';
+  const defaults={Idle:8,Walk:10,Run:12,Jump:10,Attack:12,Death:8};
+  let finalName=name||'Walk';
   if(clips.some(c=>c.name.toLowerCase()===finalName.toLowerCase())){
     let n=2;while(clips.some(c=>c.name.toLowerCase()===(finalName+' '+n).toLowerCase()))n++;
     finalName+=' '+n;
   }
   snapshot();const fps=defaults[name]||8;const id='clip-'+Date.now()+'-'+Math.floor(Math.random()*10000);
-  clips.push({id,name:finalName,fps,loop:name!=='Смерть',frames:[makeFrame()]});
+  clips.push({id,name:finalName,fps,loop:name!=='Death',frames:[makeFrame()]});
   activeClipId=id;frames=activeClip().frames;frameIndex=0;layerIndex=0;selectedFrames=new Set([0]);
   renderAll();$('saveStatus').textContent='Создан клип «'+finalName+'»';
 }
